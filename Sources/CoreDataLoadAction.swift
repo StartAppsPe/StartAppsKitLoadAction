@@ -16,14 +16,9 @@ open class CoreDataLoadActionSingle<U: NSManagedObject>: LoadAction<U?> {
     
     fileprivate func loadInner(completion: LoadResultClosure) {
         print(owner: "LoadAction[CoreData]", items: "Load single began", level: .info)
-        do {
-            let loadedValue = try NSManagedObject.fetchSingle(U.self, predicate: predicate)
-            print(owner: "LoadAction[CoreData]", items: "Load single success", level: .info)
-            completion(.success(loadedValue))
-        } catch {
-            print(owner: "LoadAction[CoreData]", items: "Load single failure. \(error)", level: .error)
-            completion(.failure(error))
-        }
+        let loadedValue = NSManagedObject.fetchSingle(U.self, predicate: predicate)
+        print(owner: "LoadAction[CoreData]", items: "Load single success", level: .verbose)
+        completion(.success(loadedValue))
     }
     
     public init(
@@ -48,14 +43,9 @@ open class CoreDataLoadAction<U: NSManagedObject>: LoadAction<[U]> {
     
     fileprivate func loadInner(completion: LoadResultClosure) {
         print(owner: "LoadAction[CoreData]", items: "Load Began", level: .info)
-        do {
-            let loadedValue = try NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)
-            print(owner: "LoadAction[CoreData]", items: "Load Success", level: .info)
-            completion(.success(loadedValue))
-        } catch {
-            print(owner: "LoadAction[CoreData]", items: "Load Failure. \(error)", level: .error)
-            completion(.failure(error))
-        }
+        let loadedValue = NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)
+        print(owner: "LoadAction[CoreData]", items: "Load Success", level: .info)
+        completion(.success(loadedValue))
     }
     
     public init(
