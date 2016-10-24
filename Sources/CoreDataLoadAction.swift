@@ -6,6 +6,8 @@
 //  Copyright © 2016 Universidad de Lima. All rights reserved.
 //
 
+#if os(iOS) || os(macOS)
+
 import Foundation
 import CoreData
 import StartAppsKitLogger
@@ -64,3 +66,5 @@ open class CoreDataLoadAction<U: NSManagedObject>: LoadAction<[U]> {
     }
     
 }
+
+#endif

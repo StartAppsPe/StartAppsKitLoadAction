@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 is.oto.pe. All rights reserved.
 //
 
+#if os(iOS) || os(macOS)
+
 import CoreData
 import StartAppsKitLogger
 
@@ -157,3 +159,5 @@ public extension ClassNameable {
     }
     
 }
+
+#endif
