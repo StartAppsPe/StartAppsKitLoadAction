@@ -37,8 +37,6 @@
     
     open class LoadActionStatusView: UIView, LoadActionDelegate {
         
-        @IBOutlet open weak var activityIndicatorView: UIActivityIndicatorView!
-        
         open var loadingParams = LoadActionStatusViewParams.defaultParams.loadingParams
         open var errorParams   = LoadActionStatusViewParams.defaultParams.errorParams
         open var emptyParams   = LoadActionStatusViewParams.defaultParams.emptyParams
@@ -64,16 +62,34 @@
             backgroundColor = UIColor.clear
             boxView.backgroundColor = UIColor.clear
             
-            addCenterSubview(activityIndicatorView)
-            
+            activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
             boxView.translatesAutoresizingMaskIntoConstraints = false
             imageView.translatesAutoresizingMaskIntoConstraints = false
             textLabel.translatesAutoresizingMaskIntoConstraints = false
             button.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(activityIndicatorView)
             addSubview(boxView)
             boxView.addSubview(imageView)
             boxView.addSubview(textLabel)
             boxView.addSubview(button)
+            
+            // ActivityIndicator Constraints
+            self.addConstraint(
+                NSLayoutConstraint(item: activityIndicatorView,
+                                   attribute: .centerX,
+                                   relatedBy: .equal,
+                                   toItem: self, attribute: .centerX,
+                                   multiplier: 1.0, constant: 0.0
+                )
+            )
+            self.addConstraint(
+                NSLayoutConstraint(item: activityIndicatorView,
+                                   attribute: .centerY,
+                                   relatedBy: .equal,
+                                   toItem: self, attribute: .centerY,
+                                   multiplier: 1.0, constant: 0.0
+                )
+            )
             
             // BoxView Constraints
             self.addConstraint(
