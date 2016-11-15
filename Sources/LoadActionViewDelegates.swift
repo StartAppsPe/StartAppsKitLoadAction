@@ -77,6 +77,7 @@
         
     }
     
+    private var _rcak: UInt8 = 1
     
     public extension UIScrollView {
         

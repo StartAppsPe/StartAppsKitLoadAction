@@ -308,7 +308,6 @@
     
     
     private var _svak: UInt8 = 0
-    private var _rcak: UInt8 = 1
     
     public protocol StatusViewPresentable: class {
         var backgroundView: UIView? { set get }
