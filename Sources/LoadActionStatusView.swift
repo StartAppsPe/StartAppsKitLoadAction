@@ -62,6 +62,11 @@
             backgroundColor = UIColor.clear
             boxView.backgroundColor = UIColor.clear
             
+            activityIndicatorView.activityIndicatorViewStyle = .whiteLarge
+            activityIndicatorView.hidesWhenStopped = true
+            let color = UITabBar.appearance().barTintColor ?? UINavigationBar.appearance().barTintColor
+            activityIndicatorView.color = color ?? UIColor.black
+            
             activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
             boxView.translatesAutoresizingMaskIntoConstraints = false
             imageView.translatesAutoresizingMaskIntoConstraints = false
