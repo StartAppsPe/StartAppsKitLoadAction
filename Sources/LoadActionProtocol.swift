@@ -30,7 +30,7 @@ public protocol LoadActionLoadableType: AnyObject {
     
     var delegates: [LoadActionDelegate] { get set }
     
-    func loadNew()
+    func loadNew(completion: ((_ result: Result<Any>) -> Void)?)
     func loadAny(completion: ((_ result: Result<Any>) -> Void)?)
     
     var updatedProperties: Set<LoadActionProperties> { get set }

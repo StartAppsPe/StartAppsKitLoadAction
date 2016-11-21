@@ -32,6 +32,12 @@ open class GroupLoadAction<T>: LoadAction<T> {
     open  var actions:       [LoadActionLoadableType]
     fileprivate var actionsToLoad: [LoadActionLoadableType] = []
     
+    fileprivate var forceNew = false
+    open override func loadNew(completion: ((Result<Any>) -> Void)?) {
+        forceNew = true
+        super.loadNew(completion: completion)
+    }
+    
     /**
      Loads data giving the option of paging or loading new.
      
@@ -46,11 +52,13 @@ open class GroupLoadAction<T>: LoadAction<T> {
         // choose loading function
         switch order {
         case .sequential, .sequentialForced:
-            loadSequential(completion: completion)
+            loadSequential(forceNew: forceNew, completion: completion)
         case .parallel:
-            loadParallel(completion: completion)
+            loadParallel(forceNew: forceNew, completion: completion)
         }
         
+        // Return force new to normal
+        if forceNew { forceNew = false }
     }
     
     /**
@@ -59,13 +67,13 @@ open class GroupLoadAction<T>: LoadAction<T> {
      - parameter forced: If true forces main load
      - parameter completion: Closure called when operation finished
      */
-    fileprivate func loadSequential(completion: @escaping LoadAction<T>.LoadedResultClosure) {
+    fileprivate func loadSequential(forceNew: Bool, completion: @escaping LoadAction<T>.LoadedResultClosure) {
         if let actionToLoad = actionsToLoad.popFirst() {
-            actionToLoad.loadAny() { (result) -> Void in
+            let completionHandler: ((Result<Any>) -> Void) = { (result) -> Void in
                 self.updateValueAndError()
                 if result.isSuccess || self.order != .sequentialForced {
                     if self.actionsToLoad.count > 0 { self.sendDelegateUpdates() }
-                    self.loadSequential(completion: completion)
+                    self.loadSequential(forceNew: forceNew, completion: completion)
                 } else {
                     self.actionsToLoad = []
                     if let error = self.error {
@@ -75,6 +83,11 @@ open class GroupLoadAction<T>: LoadAction<T> {
                         completion(.failure(error))
                     }
                 }
+            }
+            if forceNew {
+                actionToLoad.loadNew(completion: completionHandler)
+            } else {
+                actionToLoad.loadAny(completion: completionHandler)
             }
         } else {
             self.updateValueAndError()
@@ -93,9 +106,9 @@ open class GroupLoadAction<T>: LoadAction<T> {
      - parameter forced: If true forces main load
      - parameter completion: Closure called when operation finished
      */
-    fileprivate func loadParallel(completion: @escaping LoadAction<T>.LoadedResultClosure) {
+    fileprivate func loadParallel(forceNew: Bool, completion: @escaping LoadAction<T>.LoadedResultClosure) {
         while let actionToLoad = actionsToLoad.popFirst() {
-            actionToLoad.loadAny() { (result) -> Void in
+            let completionHandler: ((Result<Any>) -> Void) = { (result) -> Void in
                 self.updateValueAndError()
                 if self.actions.find({ $0.status != .ready }) == nil {
                     if let error = self.error { // self.actions.find({ $0.error != nil }) == nil
@@ -109,6 +122,11 @@ open class GroupLoadAction<T>: LoadAction<T> {
                 } else {
                     self.sendDelegateUpdates()
                 }
+            }
+            if forceNew {
+                actionToLoad.loadNew(completion: completionHandler)
+            } else {
+                actionToLoad.loadAny(completion: completionHandler)
             }
         }
     }

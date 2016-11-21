@@ -32,9 +32,21 @@ open class CacheLoadAction<T>: LoadAction<T> {
         useForcedNext = forced
         load(completion: completion)
     }
-    
-    open override func loadNew() {
-        load(forced: true, completion: nil)
+
+    open func loadAny(forced: Bool, completion: ((Result<Any>) -> Void)?) {
+        load(forced: forced) { (resultGeneric) -> Void in
+            switch resultGeneric {
+            case .success(let loadedValue):
+                completion?(.success(loadedValue))
+            case .failure(let error):
+                completion?(.failure(error))
+            }
+        }
+    }
+
+    open override func loadNew(completion: ((Result<Any>) -> Void)?) {
+        Log.debug("Load New")
+        loadAny(forced: true, completion: completion)
     }
     
     fileprivate func loadInner(completion: @escaping LoadResultClosure) {

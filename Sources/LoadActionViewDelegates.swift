@@ -71,7 +71,7 @@
         
         public func setAction(controlEvents: UIControlEvents, loadAction: LoadActionLoadableType) {
             setAction(controlEvents: controlEvents) { (sender) in
-                loadAction.loadNew()
+                loadAction.loadNew(completion: nil)
             }
         }
         

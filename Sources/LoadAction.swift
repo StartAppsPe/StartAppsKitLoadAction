@@ -43,10 +43,6 @@ open class LoadAction<T>: LoadActionType {
     
     open var loadClosure: LoadResult!
     
-    open func loadNew() {
-        load(completion: nil)
-    }
-    
     /**
      Loads value giving the option of paging or loading new.
      
@@ -79,6 +75,10 @@ open class LoadAction<T>: LoadActionType {
             completion?(result)
         }
         
+    }
+    
+    open func loadNew(completion: ((_ result: Result<Any>) -> Void)? = nil) {
+        loadAny(completion: completion)
     }
     
     open func loadAny(completion: ((_ result: Result<Any>) -> Void)?) {
