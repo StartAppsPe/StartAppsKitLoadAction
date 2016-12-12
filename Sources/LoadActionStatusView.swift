@@ -328,7 +328,14 @@
         }
         
         public var loadActionStatusView: LoadActionStatusView {
-            get { return objc_getAssociatedObject(self, &_svak) as? LoadActionStatusView ?? createLoadActionStatusView() }
+            get {
+                guard let statusView = objc_getAssociatedObject(self, &_svak) as? LoadActionStatusView else {
+                    let statusView = createLoadActionStatusView()
+                    objc_setAssociatedObject(self, &_svak, statusView, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
+                    return statusView
+                }
+                return statusView
+            }
             set { objc_setAssociatedObject(self, &_svak, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN) }
         }
         
