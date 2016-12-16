@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
 
 s.name             = 'StartAppsKitLoadAction'
-s.version          = '1.3.1'
+s.version          = '1.3.2'
 s.summary          = 'A library that does everything.'
 s.description      = <<-DESC
 A library that does everything. Central class is LoadAction and it helps you work with asynchronous loading of data from any Source.

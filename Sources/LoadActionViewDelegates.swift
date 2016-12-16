@@ -22,38 +22,7 @@
         
     }
     
-    extension UIButton: LoadActionDelegate {
-        
-        public func loadActionUpdated<L: LoadActionType>(loadAction: L, updatedProperties: Set<LoadActionProperties>) {
-            guard updatedProperties.contains(.status) || updatedProperties.contains(.error) else { return }
-            switch loadAction.status {
-            case .loading:
-                activityIndicatorView?.startAnimating()
-                isUserInteractionEnabled = false
-                tempTitle = ""
-            case .ready:
-                activityIndicatorView?.stopAnimating()
-                activityIndicatorView  = nil
-                isUserInteractionEnabled = true
-                if loadAction.error != nil {
-                    tempTitle = errorTitle ?? "Error"
-                } else {
-                    tempTitle = nil
-                }
-            }
-        }
-        
-    }
-    
-    extension UIRefreshControl: LoadActionDelegate {
-        
-        public func loadActionUpdated<L: LoadActionType>(loadAction: L, updatedProperties: Set<LoadActionProperties>) {
-            guard updatedProperties.contains(.status) else { return }
-            switch loadAction.status {
-            case .loading: active = true
-            case .ready:   active = false
-            }
-        }
+    extension UIRefreshControl {
         
         public convenience init(loadAction: LoadActionLoadableType) {
             self.init()
@@ -76,6 +45,42 @@
         }
         
     }
+    
+    extension UIControl: LoadActionDelegate {
+        
+        public func loadActionUpdated<L: LoadActionType>(loadAction: L, updatedProperties: Set<LoadActionProperties>) {
+            guard updatedProperties.contains(.status) || updatedProperties.contains(.error) else { return }
+            switch loadAction.status {
+            case .loading:
+                isEnabled = false
+                isUserInteractionEnabled = false
+                if let selfButton = self as? UIButton {
+                    selfButton.activityIndicatorView?.startAnimating()
+                    selfButton.tempTitle = ""
+                }
+                if let selfRefreshControl = self as? UIRefreshControl {
+                    selfRefreshControl.active = true
+                }
+            case .ready:
+                isEnabled = true
+                isUserInteractionEnabled = true
+                if let selfButton = self as? UIButton {
+                    selfButton.activityIndicatorView?.stopAnimating()
+                    selfButton.activityIndicatorView  = nil
+                    if loadAction.error != nil {
+                        selfButton.tempTitle = selfButton.errorTitle ?? "Error"
+                    } else {
+                        selfButton.tempTitle = nil
+                    }
+                }
+                if let selfRefreshControl = self as? UIRefreshControl {
+                    selfRefreshControl.active = false
+                }
+            }
+        }
+        
+    }
+
     
     private var _rcak: UInt8 = 1
     
