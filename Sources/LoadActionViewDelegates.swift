@@ -68,7 +68,7 @@
                     selfButton.activityIndicatorView?.stopAnimating()
                     selfButton.activityIndicatorView  = nil
                     if loadAction.error != nil {
-                        selfButton.tempTitle = selfButton.errorTitle ?? "Error"
+                        selfButton.tempTitle = selfButton.errorTitle
                     } else {
                         selfButton.tempTitle = nil
                     }
