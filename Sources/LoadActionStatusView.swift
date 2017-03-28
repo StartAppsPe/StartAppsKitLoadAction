@@ -29,7 +29,7 @@
         
         public struct LoadActionStatusViewParamsDefault {
             public var loadingParams: LoadActionStatusViewParams { return LoadActionStatusViewParams(activityAnimating: true) }
-            public var errorParams:   LoadActionStatusViewParams { return LoadActionStatusViewParams(message: "Error") }
+            public var errorParams:   LoadActionStatusViewParams { return LoadActionStatusViewParams(message: "[Error]") }
             public var emptyParams:   LoadActionStatusViewParams { return LoadActionStatusViewParams(message: "No data") }
         }
         open static var defaultParams = LoadActionStatusViewParamsDefault()
@@ -61,6 +61,9 @@
             super.init(frame: frame)
             backgroundColor = UIColor.clear
             boxView.backgroundColor = UIColor.clear
+            
+            textLabel.numberOfLines = 0
+            textLabel.textAlignment = .center
             
             activityIndicatorView.activityIndicatorViewStyle = .whiteLarge
             activityIndicatorView.hidesWhenStopped = true
@@ -293,8 +296,13 @@
                 params = emptyParams
             }
             
+            var message = params?.message
+            if let error = loadAction.error {
+                message = message?.replacingOccurrences(of: "[Error]", with: error.localizedDescription)
+            }
+            
             isHidden = (params == nil)
-            textLabel.text = params?.message
+            textLabel.text = message
             activityIndicatorView.active = params?.activityAnimating ?? false
             
             imageView.image = params?.image

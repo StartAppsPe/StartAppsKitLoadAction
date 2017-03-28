@@ -15,8 +15,16 @@ let session = URLSession(
     delegateQueue: OperationQueue.main
 )
 
-public enum WebLoadError: Error {
+public enum WebLoadError: Error, LocalizedError {
     case noInternet, emptyResponse
+    public var errorDescription: String? {
+        switch self {
+        case .noInternet:
+            return NSLocalizedString("No internet connection.", comment: "")
+        case .emptyResponse:
+            return NSLocalizedString("Empry response.", comment: "")
+        }
+    }
 }
 
 open class WebLoadAction: LoadAction<Data> {
