@@ -66,6 +66,7 @@ open class LoadAction<T>: LoadActionType {
             case .success(let loadedValue):
                 print(owner: "LoadAction[Main]", items: "Loaded Success", level: .verbose)
                 self.value = loadedValue
+                self.error = nil
             }
             
             // Adjust loading status to loaded kind and call completion

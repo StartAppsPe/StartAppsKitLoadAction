@@ -119,12 +119,12 @@
             }
             
             if let tableView = self as? UITableView {
-                tableView.loadActionStatusView.loadActionUpdated(loadAction: loadAction, updatedProperties: updatedProperties)
+                tableView.displayStateView.loadActionUpdated(loadAction: loadAction, updatedProperties: updatedProperties)
                 tableView.separatorStyle = (loadAction.value != nil ? .singleLine : .none)
                 tableView.reloadData()
             }
             if let collectionView = self as? UICollectionView {
-                collectionView.loadActionStatusView.loadActionUpdated(loadAction: loadAction, updatedProperties: updatedProperties)
+                collectionView.displayStateView.loadActionUpdated(loadAction: loadAction, updatedProperties: updatedProperties)
                 collectionView.reloadData()
             }
         }

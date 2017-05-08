@@ -1,5 +1,5 @@
 //
-//  LoadActionStatusView.swift
+//  DisplayStateView.swift
 //  StartAppsKitLoadAction
 //
 //  Created by Gabriel Lanata on 14/11/16.
@@ -10,36 +10,38 @@
     
     import UIKit
     
-    open class LoadActionStatusViewParams {
-        open var activityAnimating: Bool
-        open var image: UIImage?
-        open var message: String?
-        open var buttonTitle: String?
-        open var buttonColor: UIColor?
-        open var buttonAction: ((_ sender: AnyObject) -> Void)?
-        public init(activityAnimating: Bool = false, image: UIImage? = nil, message: String? = nil,
+    public struct DisplayStateViewParams {
+        public var activityAnimating: Bool
+        public var image: UIImage?
+        public var message: String?
+        public var messageColor: UIColor?
+        public var buttonTitle: String?
+        public var buttonColor: UIColor?
+        public var buttonAction: ((_ sender: AnyObject) -> Void)?
+        public init(activityAnimating: Bool = false, image: UIImage? = nil, message: String? = nil, messageColor: UIColor? = nil,
                     buttonTitle: String? = nil, buttonColor: UIColor? = nil, buttonAction: ((_ sender: AnyObject) -> Void)? = nil) {
             self.activityAnimating = activityAnimating
             self.image = image
             self.message = message
+            self.messageColor = messageColor
             self.buttonTitle = buttonTitle
             self.buttonColor = buttonColor
             self.buttonAction = buttonAction
         }
         
-        public struct LoadActionStatusViewParamsDefault {
-            public var loadingParams: LoadActionStatusViewParams { return LoadActionStatusViewParams(activityAnimating: true) }
-            public var errorParams:   LoadActionStatusViewParams { return LoadActionStatusViewParams(message: "[Error]") }
-            public var emptyParams:   LoadActionStatusViewParams { return LoadActionStatusViewParams(message: "No data") }
+        public struct DisplayStateViewParamsDefault {
+            public var loadingParams = DisplayStateViewParams(activityAnimating: true)
+            public var emptyParams   = DisplayStateViewParams(message: "No data")
+            public var errorParams   = DisplayStateViewParams(message: "[Error]")
         }
-        open static var defaultParams = LoadActionStatusViewParamsDefault()
+        public static var defaultParams = DisplayStateViewParamsDefault()
     }
     
-    open class LoadActionStatusView: UIView, LoadActionDelegate {
+    open class DisplayStateView: UIView, LoadActionDelegate {
         
-        open var loadingParams = LoadActionStatusViewParams.defaultParams.loadingParams
-        open var errorParams   = LoadActionStatusViewParams.defaultParams.errorParams
-        open var emptyParams   = LoadActionStatusViewParams.defaultParams.emptyParams
+        open var loadingParams = DisplayStateViewParams.defaultParams.loadingParams
+        open var emptyParams   = DisplayStateViewParams.defaultParams.emptyParams
+        open var errorParams   = DisplayStateViewParams.defaultParams.errorParams
         
         open var activityIndicatorView = UIActivityIndicatorView()
         open var boxView   = UIView()
@@ -83,19 +85,21 @@
             
             // ActivityIndicator Constraints
             self.addConstraint(
-                NSLayoutConstraint(item: activityIndicatorView,
-                                   attribute: .centerX,
-                                   relatedBy: .equal,
-                                   toItem: self, attribute: .centerX,
-                                   multiplier: 1.0, constant: 0.0
+                NSLayoutConstraint(
+                    item: activityIndicatorView,
+                    attribute: .centerX,
+                    relatedBy: .equal,
+                    toItem: self, attribute: .centerX,
+                    multiplier: 1.0, constant: 0.0
                 )
             )
             self.addConstraint(
-                NSLayoutConstraint(item: activityIndicatorView,
-                                   attribute: .centerY,
-                                   relatedBy: .equal,
-                                   toItem: self, attribute: .centerY,
-                                   multiplier: 1.0, constant: 0.0
+                NSLayoutConstraint(
+                    item: activityIndicatorView,
+                    attribute: .centerY,
+                    relatedBy: .equal,
+                    toItem: self, attribute: .centerY,
+                    multiplier: 1.0, constant: 0.0
                 )
             )
             
@@ -285,24 +289,34 @@
         }
         
         open func loadActionUpdated<L: LoadActionType>(loadAction: L, updatedProperties: Set<LoadActionProperties>) {
-            var params: LoadActionStatusViewParams?
-            if let value = loadAction.valueAny , (value as? NSArray)?.count ?? 1 > 0  {
-                // No params
-            } else if loadAction.status == .loading {
+            displayState = loadAction.displayState
+        }
+        
+        public var displayState: DisplayState = .none {
+            didSet { update() }
+        }
+        
+        open func update() {
+            var params: DisplayStateViewParams?
+            switch displayState {
+            case .none, .loaded:
+                params = nil
+            case .loading:
                 params = loadingParams
-            } else if loadAction.error != nil {
-                params = errorParams
-            } else {
+            case .empty:
                 params = emptyParams
+            case .error(let error):
+                params = errorParams
+                let errorMessage = error.localizedDescription
+                params!.message = params!.message?.replacingOccurrences(of: "[Error]", with: errorMessage)
             }
-            
-            var message = params?.message
-            if let error = loadAction.error {
-                message = message?.replacingOccurrences(of: "[Error]", with: error.localizedDescription)
-            }
-            
+            update(params: params)
+        }
+        
+        open func update(params: DisplayStateViewParams?) {
             isHidden = (params == nil)
-            textLabel.text = message
+            textLabel.text = params?.message
+            textLabel.textColor = params?.messageColor ?? UIColor(white: 0.0, alpha: 0.8)
             activityIndicatorView.active = params?.activityAnimating ?? false
             
             imageView.image = params?.image
@@ -328,17 +342,17 @@
     
     public extension StatusViewPresentable {
         
-        fileprivate func createLoadActionStatusView() -> LoadActionStatusView {
-            let tempView = LoadActionStatusView()
+        fileprivate func createDisplayStateView() -> DisplayStateView {
+            let tempView = DisplayStateView()
             tempView.backgroundColor = UIColor.clear
             backgroundView = tempView
             return tempView
         }
         
-        public var loadActionStatusView: LoadActionStatusView {
+        public var displayStateView: DisplayStateView {
             get {
-                guard let statusView = objc_getAssociatedObject(self, &_svak) as? LoadActionStatusView else {
-                    let statusView = createLoadActionStatusView()
+                guard let statusView = objc_getAssociatedObject(self, &_svak) as? DisplayStateView else {
+                    let statusView = createDisplayStateView()
                     objc_setAssociatedObject(self, &_svak, statusView, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
                     return statusView
                 }
@@ -347,9 +361,28 @@
             set { objc_setAssociatedObject(self, &_svak, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN) }
         }
         
+        public var displayState: DisplayState {
+            get { return displayStateView.displayState }
+            set { displayStateView.displayState = newValue }
+        }
+        
     }
     
     extension UICollectionView: StatusViewPresentable { }
     extension UITableView: StatusViewPresentable { }
+    
+    // MARK: - Legacy Support
+    
+    public typealias LoadActionStatusView = DisplayStateView
+    
+    public extension StatusViewPresentable {
+        
+        // Legacy support
+        public var loadActionStatusView: LoadActionStatusView {
+            get { return displayStateView }
+            set { displayStateView = newValue }
+        }
+        
+    }
     
 #endif

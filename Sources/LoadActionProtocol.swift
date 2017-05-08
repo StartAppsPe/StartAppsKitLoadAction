@@ -13,6 +13,10 @@ public enum LoadingStatus {
     case ready, loading
 }
 
+public enum DisplayState {
+    case none, loaded, loading, empty, error(Error)
+}
+
 public enum LoadActionProperties {
     case status, error, value, date
 }
@@ -28,6 +32,8 @@ public protocol LoadActionLoadableType: AnyObject {
     var date:     Date?         { get }
     var valueAny: Any?          { get }
     
+    var displayState: DisplayState { get }
+    
     var delegates: [LoadActionDelegate] { get set }
     
     func loadNew(completion: ((_ result: Result<Any>) -> Void)?)
@@ -35,6 +41,7 @@ public protocol LoadActionLoadableType: AnyObject {
     
     var updatedProperties: Set<LoadActionProperties> { get set }
     
+    func addDelegate(_ delegate: LoadActionDelegate, updateNow: Bool)
     func addDelegate(_ delegate: LoadActionDelegate)
     func removeDelegate(_ delegate: LoadActionDelegate)
     func sendDelegateUpdates(forced: Bool)
@@ -61,6 +68,18 @@ public extension LoadActionType {
         return value
     }
     
+    public var displayState: DisplayState {
+        if let value = value, (value as? NSArray)?.count ?? 1 > 0  {
+            return .loaded
+        } else if status == .loading {
+            return .loading
+        } else if let error = error {
+            return .error(error)
+        } else {
+            return .empty
+        }
+    }
+    
     public func sendDelegateUpdates(forced: Bool = false) {
         guard forced || updatedProperties.count > 0 else { return }
         delegates.forEach({ $0.loadActionUpdated(loadAction: self, updatedProperties: self.updatedProperties) })
@@ -68,9 +87,15 @@ public extension LoadActionType {
     }
     
     public func addDelegate(_ delegate: LoadActionDelegate) {
+        addDelegate(delegate, updateNow: true)
+    }
+    
+    public func addDelegate(_ delegate: LoadActionDelegate, updateNow: Bool) {
         if !delegates.contains(where: { $0 === delegate }) {
             delegates.append(delegate)
-            delegate.loadActionUpdated(loadAction: self, updatedProperties: [])
+            if updateNow {
+                delegate.loadActionUpdated(loadAction: self, updatedProperties: [])
+            }
         }
     }
     
