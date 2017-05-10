@@ -358,7 +358,9 @@
                 }
                 return statusView
             }
-            set { objc_setAssociatedObject(self, &_svak, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN) }
+            set {
+                objc_setAssociatedObject(self, &_svak, newValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
+            }
         }
         
         public var displayState: DisplayState {

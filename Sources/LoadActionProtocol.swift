@@ -27,6 +27,7 @@ public protocol LoadActionDelegate: AnyObject {
 
 public protocol LoadActionLoadableType: AnyObject {
     
+    var loadingStatus: LoadingStatus { get } // Same as status
     var status:   LoadingStatus { get }
     var error:    Error?        { get }
     var date:     Date?         { get }
@@ -63,6 +64,10 @@ public protocol LoadActionType: LoadActionLoadableType {
 }
 
 public extension LoadActionType {
+    
+    public var loadingStatus: LoadingStatus {
+        return status
+    }
     
     public var valueAny: Any? {
         return value

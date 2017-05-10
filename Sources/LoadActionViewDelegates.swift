@@ -9,6 +9,7 @@
 #if os(iOS)
     
     import UIKit
+    import StartAppsKitExtensions
     
     extension UIActivityIndicatorView: LoadActionDelegate {
         
@@ -18,6 +19,11 @@
             case .loading: self.startAnimating()
             case .ready:   self.stopAnimating()
             }
+        }
+        
+        public var loadingStatus: LoadingStatus {
+            get { return (isAnimating ? .loading : .ready) }
+            set { self.active = (newValue == .loading) }
         }
         
     }
@@ -32,6 +38,11 @@
         
         public func setAction(loadAction: LoadActionLoadableType) {
             setAction(controlEvents: .valueChanged, loadAction: loadAction)
+        }
+        
+        public var loadingStatus: LoadingStatus {
+            get { return (isRefreshing ? .loading : .ready) }
+            set { self.active = (newValue == .loading) }
         }
         
     }
