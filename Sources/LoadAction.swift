@@ -43,17 +43,31 @@ open class LoadAction<T>: LoadActionType {
     
     open var loadClosure: LoadResult!
     
+    open var completionHandlers: [LoadResultClosure] = []
+    
     /**
      Loads value giving the option of paging or loading new.
      
      - parameter completion: Closure called when operation finished
      */
     open func load(completion: LoadResultClosure?) {
-        LoadActionLoadingCount += 1
         print(owner: "LoadAction[Main]", items: "Load Began", level: .verbose)
+        
+        // Add completion handler to the stack
+        if let completion = completion {
+            completionHandlers.append(completion)
+        }
+        
+        // Cancel if already loading
+        guard status != .loading else {
+            print(owner: "LoadAction[Main]", items: "Load Batched", level: .info)
+            // Completion handler will be called later
+            return
+        }
         
         // Adjust loading status to loading kind
         status = .loading
+        LoadActionLoadingCount += 1
         sendDelegateUpdates()
         
         // Load value
@@ -73,7 +87,10 @@ open class LoadAction<T>: LoadActionType {
             self.status = .ready
             LoadActionLoadingCount -= 1
             self.sendDelegateUpdates()
-            completion?(result)
+            while !self.completionHandlers.isEmpty {
+                let completion = self.completionHandlers.removeFirst()
+                completion(result)
+            }
         }
         
     }
