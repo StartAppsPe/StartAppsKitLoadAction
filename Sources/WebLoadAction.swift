@@ -73,7 +73,10 @@ open class WebLoadAction: LoadAction<Data> {
 }
 
 
+public func StringProcess(_ loadedValue: Data) throws -> String {
+    return try String(data: loadedValue)
+}
 
-
-
-
+public func StringProcess(_ loadedValue: [UInt8]) throws -> String {
+    return try String(bytes: loadedValue)
+}
