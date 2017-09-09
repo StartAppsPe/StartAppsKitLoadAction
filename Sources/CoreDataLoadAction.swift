@@ -7,64 +7,93 @@
 //
 
 #if os(iOS) || os(macOS)
-
-import Foundation
-import CoreData
-import StartAppsKitLogger
-
-open class CoreDataLoadActionSingle<U: NSManagedObject>: LoadAction<U?> {
     
-    open var predicate:       NSPredicate?
+    import Foundation
+    import CoreData
+    import StartAppsKitLogger
     
-    fileprivate func loadInner(completion: LoadResultClosure) {
-        print(owner: "LoadAction[CoreData]", items: "Load single began", level: .info)
-        let loadedValue = NSManagedObject.fetchSingle(U.self, predicate: predicate)
-        print(owner: "LoadAction[CoreData]", items: "Load single success", level: .verbose)
-        completion(.success(loadedValue))
-    }
-    
-    public init(
-        predicate:       NSPredicate? = nil,
-        dummy:           (() -> ())? = nil)
-    {
-        self.predicate = predicate
-        super.init(
-            load:      { _ in }
-        )
-        loadClosure = { (completion) -> Void in
-            self.loadInner(completion: completion)
+    open class CoreDataLoadActionSingle<U: NSManagedObject>: LoadAction<U> {
+        
+        open var predicate:       NSPredicate?
+        
+        fileprivate func loadInner(completion: LoadResultClosure) {
+            print(owner: "LoadAction[CoreData]", items: "Load single began", level: .info)
+            if let loadedValue = NSManagedObject.fetchSingle(U.self, predicate: predicate) {
+                print(owner: "LoadAction[CoreData]", items: "Load single success", level: .verbose)
+                completion(.success(loadedValue))
+            } else {
+                completion(.failure(CoreDataError.fetchFailure("Item not found")))
+            }
         }
-    }
-    
-}
-
-open class CoreDataLoadAction<U: NSManagedObject>: LoadAction<[U]> {
-    
-    open var predicate:       NSPredicate?
-    open var sortDescriptors: [NSSortDescriptor]?
-    
-    fileprivate func loadInner(completion: LoadResultClosure) {
-        print(owner: "LoadAction[CoreData]", items: "Load Began", level: .info)
-        let loadedValue = NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)
-        print(owner: "LoadAction[CoreData]", items: "Load Success", level: .info)
-        completion(.success(loadedValue))
-    }
-    
-    public init(
-        predicate:       NSPredicate? = nil,
-        sortDescriptors: [NSSortDescriptor]? = nil,
-        dummy:           (() -> ())? = nil)
-    {
-        self.predicate = predicate
-        self.sortDescriptors = sortDescriptors
-        super.init(
-            load:      { _ in }
-        )
-        loadClosure = { (completion) -> Void in
-            self.loadInner(completion: completion)
+        
+        public init(
+            predicate:       NSPredicate? = nil,
+            dummy:           (() -> ())? = nil)
+        {
+            self.predicate = predicate
+            super.init(
+                load:      { _ in }
+            )
+            loadClosure = { (completion) -> Void in
+                self.loadInner(completion: completion)
+            }
         }
+        
     }
     
-}
-
+    open class CoreDataLoadActionSingleOptional<U: NSManagedObject>: LoadAction<U?> {
+        
+        open var predicate:       NSPredicate?
+        
+        fileprivate func loadInner(completion: LoadResultClosure) {
+            print(owner: "LoadAction[CoreData]", items: "Load single nil began", level: .info)
+            let loadedValue = NSManagedObject.fetchSingle(U.self, predicate: predicate)
+            print(owner: "LoadAction[CoreData]", items: "Load single nil success", level: .verbose)
+            completion(.success(loadedValue))
+        }
+        
+        public init(
+            predicate:       NSPredicate? = nil,
+            dummy:           (() -> ())? = nil)
+        {
+            self.predicate = predicate
+            super.init(
+                load:      { _ in }
+            )
+            loadClosure = { (completion) -> Void in
+                self.loadInner(completion: completion)
+            }
+        }
+        
+    }
+    
+    open class CoreDataLoadAction<U: NSManagedObject>: LoadAction<[U]> {
+        
+        open var predicate:       NSPredicate?
+        open var sortDescriptors: [NSSortDescriptor]?
+        
+        fileprivate func loadInner(completion: LoadResultClosure) {
+            print(owner: "LoadAction[CoreData]", items: "Load Began", level: .info)
+            let loadedValue = NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)
+            print(owner: "LoadAction[CoreData]", items: "Load Success", level: .info)
+            completion(.success(loadedValue))
+        }
+        
+        public init(
+            predicate:       NSPredicate? = nil,
+            sortDescriptors: [NSSortDescriptor]? = nil,
+            dummy:           (() -> ())? = nil)
+        {
+            self.predicate = predicate
+            self.sortDescriptors = sortDescriptors
+            super.init(
+                load:      { _ in }
+            )
+            loadClosure = { (completion) -> Void in
+                self.loadInner(completion: completion)
+            }
+        }
+        
+    }
+    
 #endif
