@@ -22,7 +22,7 @@ public enum WebLoadError: Error, LocalizedError {
         case .noInternet:
             return NSLocalizedString("No internet connection.", comment: "")
         case .emptyResponse:
-            return NSLocalizedString("Empry response.", comment: "")
+            return NSLocalizedString("Empty response.", comment: "")
         }
     }
 }
