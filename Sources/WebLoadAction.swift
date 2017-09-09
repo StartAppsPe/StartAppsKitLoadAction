@@ -9,12 +9,6 @@
 import Foundation
 import StartAppsKitLogger
 
-let session = URLSession(
-    configuration: URLSessionConfiguration.default,
-    delegate: nil,
-    delegateQueue: OperationQueue.main
-)
-
 public enum WebLoadError: Error, LocalizedError {
     case noInternet, emptyResponse
     public var errorDescription: String? {
@@ -30,6 +24,10 @@ public enum WebLoadError: Error, LocalizedError {
 open class WebLoadAction: LoadAction<Data> {
     
     open var urlRequest: URLRequest
+    
+    open var session: URLSession {
+        return URLSession.shared
+    }
     
     fileprivate func loadInner(completion: @escaping LoadResultClosure) {
         print(owner: "LoadAction[Web]", items: "Load Began (Url: \(urlRequest.url?.absoluteString ?? "-"))", level: .verbose)
