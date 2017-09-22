@@ -30,28 +30,28 @@ open class WebLoadAction: LoadAction<Data> {
     }
     
     fileprivate func loadInner(completion: @escaping LoadResultClosure) {
-        print(owner: "LoadAction[Web]", items: "Load Began (Url: \(urlRequest.url?.absoluteString ?? "-"))", level: .verbose)
+        Log.debug("Load Began (Url: \(urlRequest.url?.absoluteString ?? "-"))")
         session.dataTask(with: urlRequest, completionHandler: { (loadedData, urlResponse, error) -> Void in
             if let error = error {
                 switch (error as NSError).code {
                 case -1001, -1003, -1009:
                     let newError = WebLoadError.noInternet
-                    print(owner: "LoadAction[Web]", items: "Load failure, \(newError) (Url: \(self.urlRequest.url?.absoluteString ?? "-"))", level: .error)
+                    Log.error("Load failure, \(newError) (Url: \(self.urlRequest.url?.absoluteString ?? "-"))")
                     completion(.failure(newError))
                     return
                 default:
-                    print(owner: "LoadAction[Web]", items: "Load failure, \(error) (Url: \(self.urlRequest.url?.absoluteString ?? "-"))", level: .error)
+                    Log.error("Load failure, \(error) (Url: \(self.urlRequest.url?.absoluteString ?? "-"))")
                     completion(.failure(error))
                     return
                 }
             }
             guard let loadedData = loadedData else {
-                print(owner: "LoadAction[Web]", items: "Load failure, empty response (Url: \(self.urlRequest.url?.absoluteString ?? "-"))", level: .error)
+                Log.error("Load failure, empty response (Url: \(self.urlRequest.url?.absoluteString ?? "-"))")
                 let error = WebLoadError.emptyResponse
                 completion(.failure(error))
                 return
             }
-            print(owner: "LoadAction[Web]", items: "Load success (Url: \(self.urlRequest.url?.absoluteString ?? "-"))", level: .verbose)
+            Log.verbose("Load success (Url: \(self.urlRequest.url?.absoluteString ?? "-"))")
             completion(.success(loadedData))
         }).resume()
     }

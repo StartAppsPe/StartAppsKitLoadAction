@@ -68,12 +68,12 @@ open class CacheLoadAction<T>: LoadAction<T> {
                     }
                 } catch {
                     // Must load base when load cache fails
-                    print(owner: "LoadAction[Cache]", items: "Fallback to base", level: .error)
+                    Log.error("Fallback to base 2")
                     self.loadBase(completion: completion)
                 }
             case .failure(_):
                 // Must load base when load cache fails
-                print(owner: "LoadAction[Cache]", items: "Fallback to base", level: .error)
+                Log.error("Fallback to base 1")
                 self.loadBase(completion: completion)
             }
         })
@@ -85,14 +85,14 @@ open class CacheLoadAction<T>: LoadAction<T> {
      - parameter completion: Closure called when operation finished
      */
     fileprivate func loadCache(completion: @escaping LoadResultClosure) {
-        print(owner: "LoadAction[Cache]", items: "Cache Load Began", level: .info)
+        Log.debug("Cache Load Began")
         cacheLoadAction.load { (result) in
             switch result {
             case .success(_):
-                print(owner: "LoadAction[Cache]", items: "Cache Load Success", level: .info)
+                Log.verbose("Cache Load Success")
                 completion(result)
             case .failure(let error):
-                print(owner: "LoadAction[Cache]", items: "Cache Load Failure. \(error)", level: .error)
+                Log.error("Cache Load Failure. \(error)")
                 completion(result)
             }
         }
@@ -104,28 +104,28 @@ open class CacheLoadAction<T>: LoadAction<T> {
      - parameter completion: Closure called when operation finished
      */
     fileprivate func loadBase(completion: @escaping LoadResultClosure) {
-        print(owner: "LoadAction[Cache]", items: "Base Load Began", level: .info)
+        Log.debug("Base Load Began")
         baseLoadAction.load { (result) in
             switch result {
             case .success(let value):
                 if let saveToCacheClosure = self.saveToCacheClosure {
-                    print(owner: "LoadAction[Cache]", items: "Save to Cache Began", level: .info)
+                    Log.verbose("Save to Cache Began")
                     do {
                         try saveToCacheClosure(value, self)
-                        print(owner: "LoadAction[Cache]", items: "Save to Cache Success", level: .info)
-                        print(owner: "LoadAction[Cache]", items: "Base Load Success", level: .info)
+                        Log.verbose("Save to Cache Success")
+                        Log.verbose("Base Load Success")
                         completion(result)
                     } catch(let error) {
-                        print(owner: "LoadAction[Cache]", items: "Save to Cache Failure. \(error)", level: .error)
-                        print(owner: "LoadAction[Cache]", items: "Base Load Failure. \(error)", level: .error)
+                        Log.verbose("Save to Cache Failure. \(error)")
+                        Log.verbose("Base Load Failure. \(error)")
                         completion(.failure(error))
                     }
                 } else {
-                    print(owner: "LoadAction[Cache]", items: "Base Load Success", level: .info)
+                    Log.verbose("Base Load Success")
                     completion(result)
                 }
             case .failure(let error):
-                print(owner: "LoadAction[Cache]", items: "Base Load Failure. \(error)", level: .error)
+                Log.error("Base Load Failure. \(error)")
                 completion(result)
             }
         }

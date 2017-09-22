@@ -233,7 +233,7 @@
                 toItem: textLabel, attribute: .top,
                 multiplier: 1.0, constant: 0.0
             )
-            textLabelTopConstraint.priority = 900
+            textLabelTopConstraint.priority = UILayoutPriority(rawValue: 900)
             boxView.addConstraint(textLabelTopConstraint)
             let textLabelBottomConstraint = NSLayoutConstraint(
                 item: boxView, attribute: .bottom,
@@ -241,7 +241,7 @@
                 toItem: textLabel, attribute: .bottom,
                 multiplier: 1.0, constant: 0.0
             )
-            textLabelBottomConstraint.priority = 900
+            textLabelBottomConstraint.priority = UILayoutPriority(rawValue: 900)
             boxView.addConstraint(textLabelBottomConstraint)
             
             
@@ -325,10 +325,10 @@
             imageHeightConstraint.constant = imageSize?.height ?? 0
             imageTextConstraint.isActive = (params?.image != nil)
             
-            button.title = (params?.buttonTitle?.clean() != nil ? "   \(params!.buttonTitle!)   " : nil)
+            button.title = (params?.buttonTitle?.cleaned() != nil ? "   \(params!.buttonTitle!)   " : nil)
             button.backgroundColor = params?.buttonColor ?? UIColor.gray
-            button.isHidden = !(params?.buttonTitle?.clean() != nil)
-            buttonTextConstraint.isActive = (params?.buttonTitle?.clean() != nil)
+            button.isHidden = !(params?.buttonTitle?.cleaned() != nil)
+            buttonTextConstraint.isActive = (params?.buttonTitle?.cleaned() != nil)
         }
         
     }

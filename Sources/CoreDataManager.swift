@@ -51,7 +51,7 @@ open class CoreData {
     private static var _managedObjectContext: NSManagedObjectContext?
     private static func managedObjectContext() -> NSManagedObjectContext {
         if _managedObjectContext == nil {
-            let managedObjectContext = NSManagedObjectContext()
+            let managedObjectContext = NSManagedObjectContext.init(concurrencyType: .mainQueueConcurrencyType)
             managedObjectContext.persistentStoreCoordinator = persistentStoreCoordinator()
             _managedObjectContext = managedObjectContext
         }
@@ -62,40 +62,44 @@ open class CoreData {
         let managedContext = managedObjectContext()
         let entity = NSEntityDescription.entity(forEntityName: entityName, in: managedContext)!
         let newEntity = NSManagedObject(entity: entity, insertInto: managedContext)
-        print(owner: "CoreData", items: "Created (\(entityName))", level: .info)
+        Log.info("Created (\(entityName))")
         return newEntity
     }
     
     public class func save() throws {
+        Log.verbose("Save began")
         let managedContext = managedObjectContext()
         guard managedContext.hasChanges else {
-            print(owner: "CoreData", items: "Save skipped because no changes", level: .verbose)
+            Log.info("Save skipped because no changes")
             return
         }
         try managedContext.save()
-        print(owner: "CoreData", items: "Saved", level: .info)
+        Log.info("Save success")
     }
     
     open class func delete(object: NSManagedObject) {
         let managedContext = managedObjectContext()
         managedContext.delete(object)
-        print(owner: "CoreData", items: "Deleted", level: .info)
+        Log.info("Deleted 1 object")
     }
     
-    open class func fetch<T : NSFetchRequestResult>(_ entity: T.Type, entityName: String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil) -> [T] {
+    open class func fetch<T : NSFetchRequestResult>(_ entity: T.Type, entityName: String, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil) throws -> [T] {
+        Log.verbose("Fetch began (\(entityName))")
         let managedContext = managedObjectContext()
         let fetchRequest = NSFetchRequest<T>(entityName: entityName)
         fetchRequest.returnsObjectsAsFaults = false
         fetchRequest.sortDescriptors = sortDescriptors
         fetchRequest.predicate = predicate
-        return try! managedContext.fetch(fetchRequest)
+        let objects = try managedContext.fetch(fetchRequest)
+        Log.verbose("Fetch succes (\(entityName))")
+        return objects
     }
     
 }
 
 public extension NSManagedObject { // Quitar en Swift 2.0
     
-    public class func create<T:NSManagedObject>(_ entity: T.Type) -> T where T:ClassNameable {
+    public class func create<T:NSManagedObject>(_ entity: T.Type) -> T {
         return CoreData.create(entityName: T.className) as! T
     }
     
@@ -105,20 +109,20 @@ public extension NSManagedObject { // Quitar en Swift 2.0
         return obj
     }
     
-    public class func fetch<T:NSManagedObject>(_ entity: T.Type, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil) -> [T] where T:ClassNameable {
-        return CoreData.fetch(entity, entityName: T.className, predicate: predicate, sortDescriptors: sortDescriptors)
+    public class func fetch<T:NSManagedObject>(_ entity: T.Type, predicate: NSPredicate? = nil, sortDescriptors: [NSSortDescriptor]? = nil) throws -> [T] {
+        return try CoreData.fetch(entity, entityName: T.className, predicate: predicate, sortDescriptors: sortDescriptors)
     }
     
-    public class func fetchSingle<T:NSManagedObject>(_ entity: T.Type, predicate: NSPredicate? = nil) -> T? {
-        return fetch(entity, predicate: predicate).first
+    public class func fetchSingle<T:NSManagedObject>(_ entity: T.Type, predicate: NSPredicate? = nil) throws -> T? {
+        return try fetch(entity, predicate: predicate).first
     }
     
-    public class func fetchSingle<T:NSManagedObject>(_ entity: T.Type, uid: String) -> T? where T:UniquedObject {
-        return fetchSingle(entity, predicate: NSPredicate(format: "uid == %@", uid))
+    public class func fetchSingle<T:NSManagedObject>(_ entity: T.Type, uid: String) throws -> T? where T:UniquedObject {
+        return try fetchSingle(entity, predicate: NSPredicate(format: "uid == %@", uid))
     }
     
-    public class func fetchSingleOrCreate<T:NSManagedObject>(_ entity: T.Type, uid: String) -> T where T:UniquedObject {
-        return fetchSingle(entity, uid: uid) ?? create(entity, uid: uid)
+    public class func fetchSingleOrCreate<T:NSManagedObject>(_ entity: T.Type, uid: String) throws -> T where T:UniquedObject {
+        return try fetchSingle(entity, uid: uid) ?? create(entity, uid: uid)
     }
     
     public func delete() {

@@ -14,25 +14,32 @@
     
     open class CoreDataLoadActionSingle<U: NSManagedObject>: LoadAction<U> {
         
-        open var predicate:       NSPredicate?
+        open var predicate: NSPredicate?
         
         fileprivate func loadInner(completion: LoadResultClosure) {
-            print(owner: "LoadAction[CoreData]", items: "Load single began", level: .info)
-            if let loadedValue = NSManagedObject.fetchSingle(U.self, predicate: predicate) {
-                print(owner: "LoadAction[CoreData]", items: "Load single success", level: .verbose)
-                completion(.success(loadedValue))
-            } else {
-                completion(.failure(CoreDataError.fetchFailure("Item not found")))
+            Log.info("Load single began")
+            do {
+                if let loadedValue = try NSManagedObject.fetchSingle(U.self, predicate: predicate) {
+                    Log.verbose("Load single success")
+                    completion(.success(loadedValue))
+                } else {
+                    let error = CoreDataError.fetchFailure("Item not found")
+                    Log.error("Load single failed", error)
+                    completion(.failure(error))
+                }
+            } catch {
+                Log.error("Load single failed", error)
+                completion(.failure(error))
             }
         }
         
         public init(
-            predicate:       NSPredicate? = nil,
-            dummy:           (() -> ())? = nil)
+            predicate: NSPredicate? = nil
+            )
         {
             self.predicate = predicate
             super.init(
-                load:      { _ in }
+                load: { _ in }
             )
             loadClosure = { (completion) -> Void in
                 self.loadInner(completion: completion)
@@ -43,22 +50,27 @@
     
     open class CoreDataLoadActionSingleOptional<U: NSManagedObject>: LoadAction<U?> {
         
-        open var predicate:       NSPredicate?
+        open var predicate: NSPredicate?
         
         fileprivate func loadInner(completion: LoadResultClosure) {
-            print(owner: "LoadAction[CoreData]", items: "Load single nil began", level: .info)
-            let loadedValue = NSManagedObject.fetchSingle(U.self, predicate: predicate)
-            print(owner: "LoadAction[CoreData]", items: "Load single nil success", level: .verbose)
-            completion(.success(loadedValue))
+            Log.info("Load single optional began")
+            do {
+                let loadedValue = try NSManagedObject.fetchSingle(U.self, predicate: predicate)
+                Log.verbose("Load single optional success")
+                completion(.success(loadedValue))
+            } catch {
+                Log.error("Load single optional failed", error)
+                completion(.failure(error))
+            }
         }
         
         public init(
-            predicate:       NSPredicate? = nil,
-            dummy:           (() -> ())? = nil)
+            predicate: NSPredicate? = nil
+            )
         {
             self.predicate = predicate
             super.init(
-                load:      { _ in }
+                load: { _ in }
             )
             loadClosure = { (completion) -> Void in
                 self.loadInner(completion: completion)
@@ -73,10 +85,15 @@
         open var sortDescriptors: [NSSortDescriptor]?
         
         fileprivate func loadInner(completion: LoadResultClosure) {
-            print(owner: "LoadAction[CoreData]", items: "Load Began", level: .info)
-            let loadedValue = NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)
-            print(owner: "LoadAction[CoreData]", items: "Load Success", level: .info)
-            completion(.success(loadedValue))
+            Log.info("Load began")
+            do {
+                let loadedValue = try NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)
+                Log.verbose("Load success")
+                completion(.success(loadedValue))
+            } catch {
+                Log.error("Load failure", error)
+                completion(.failure(error))
+            }
         }
         
         public init(
@@ -87,7 +104,7 @@
             self.predicate = predicate
             self.sortDescriptors = sortDescriptors
             super.init(
-                load:      { _ in }
+                load: { _ in }
             )
             loadClosure = { (completion) -> Void in
                 self.loadInner(completion: completion)

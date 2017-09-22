@@ -46,10 +46,10 @@ open class ProcessLoadAction<A, T>: LoadAction<T> {
         super.init(
             load: { _ in }
         )
-        let dajjdh = { (completion) -> Void in
+        let loadClosure = { (completion) -> Void in
             self.loadInner(completion: completion)
         }
-        self.loadClosure = dajjdh
+        self.loadClosure = loadClosure
     }
     
 }

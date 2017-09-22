@@ -47,7 +47,7 @@ public extension Result {
     }
     
     // Construct a .Success if the expression returns a value or a .Failure if it throws
-    public init(_ throwingExpr: (Void) throws -> T) {
+    public init(_ throwingExpr: () throws -> T) {
         do {
             let value = try throwingExpr()
             self = .success(value)

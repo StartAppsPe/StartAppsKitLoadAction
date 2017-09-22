@@ -12,9 +12,9 @@ import StartAppsKitLogger
 
 public let LoadActionUpdatedNotification = "LoadActionUpdatedNotification"
 public var LoadActionLoadingCount: Int = 0 {
-didSet {
-    NotificationCenter.default.post(name: Notification.Name(rawValue: LoadActionUpdatedNotification), object: nil)
-}
+    didSet {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: LoadActionUpdatedNotification), object: nil)
+    }
 }
 public var LoadActionAllStatus: LoadingStatus {
     return (LoadActionLoadingCount == 0 ? .ready : .loading)
@@ -51,7 +51,7 @@ open class LoadAction<T>: LoadActionType {
      - parameter completion: Closure called when operation finished
      */
     open func load(completion: LoadResultClosure?) {
-        print(owner: "LoadAction[Main]", items: "Load Began", level: .verbose)
+        Log.debug("Load Began")
         
         // Add completion handler to the stack
         if let completion = completion {
@@ -60,8 +60,9 @@ open class LoadAction<T>: LoadActionType {
         
         // Cancel if already loading
         guard status != .loading else {
-            print(owner: "LoadAction[Main]", items: "Load Batched", level: .info)
             // Completion handler will be called later
+            Log.debug("Load Batched")
+            self.sendDelegateUpdates()
             return
         }
         
@@ -75,21 +76,23 @@ open class LoadAction<T>: LoadActionType {
             
             switch result {
             case .failure(let error):
-                print(owner: "LoadAction[Main]", items: "Loaded Failure (\(error))", level: .error)
+                Log.error("Loaded Failure (\(error))")
                 self.error = error
             case .success(let loadedValue):
-                print(owner: "LoadAction[Main]", items: "Loaded Success", level: .verbose)
+                Log.debug("Loaded Success")
                 self.value = loadedValue
                 self.error = nil
             }
             
             // Adjust loading status to loaded kind and call completion
-            self.status = .ready
-            LoadActionLoadingCount -= 1
-            self.sendDelegateUpdates()
-            while !self.completionHandlers.isEmpty {
-                let completion = self.completionHandlers.removeFirst()
-                completion(result)
+            DispatchQueue.main.async {
+                self.status = .ready
+                LoadActionLoadingCount -= 1
+                self.sendDelegateUpdates()
+                while !self.completionHandlers.isEmpty {
+                    let completion = self.completionHandlers.removeFirst()
+                    completion(result)
+                }
             }
         }
         

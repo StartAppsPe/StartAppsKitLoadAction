@@ -46,7 +46,7 @@ public protocol LoadActionLoadableType: AnyObject {
     func addDelegate(_ delegate: LoadActionDelegate)
     func removeDelegate(_ delegate: LoadActionDelegate)
     func sendDelegateUpdates(forced: Bool)
-
+    
 }
 
 public protocol LoadActionType: LoadActionLoadableType {
@@ -86,9 +86,13 @@ public extension LoadActionType {
     }
     
     public func sendDelegateUpdates(forced: Bool = false) {
-        guard forced || updatedProperties.count > 0 else { return }
-        delegates.forEach({ $0.loadActionUpdated(loadAction: self, updatedProperties: self.updatedProperties) })
-        updatedProperties = []
+        DispatchQueue.main.async {
+            guard forced || self.updatedProperties.count > 0 else { return }
+            self.delegates.forEach({
+                $0.loadActionUpdated(loadAction: self, updatedProperties: self.updatedProperties)
+            })
+            self.updatedProperties = []
+        }
     }
     
     public func addDelegate(_ delegate: LoadActionDelegate) {
@@ -111,5 +115,3 @@ public extension LoadActionType {
     }
     
 }
-
-

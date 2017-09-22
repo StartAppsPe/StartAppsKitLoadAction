@@ -59,25 +59,25 @@ public extension FileLoadAction {
     
     public class func loadFromFile(filePath rawFilePath: String) throws -> Data {
         let filePath = self.filePath(string: rawFilePath)
-        print(owner: "LoadAction[File]", items: "Load Began (\(filePath))", level: .debug)
+        Log.debug("Load began (\(filePath))")
         do {
             let loadedData = try Data(contentsOf: filePath)
-            print(owner: "LoadAction[File]", items: "Load Success", level: .debug)
+            Log.verbose("Load Success")
             return loadedData
         } catch (let error) {
-            print(owner: "LoadAction[File]", items: "Load Failure. \(error)", level: .error)
+            Log.error("Load Failure. \(error)")
             throw error
         }
     }
     
     public class func saveToFile(filePath rawFilePath: String, value: Data) throws {
         let filePath = self.filePath(string: rawFilePath)
-        print(owner: "LoadAction[File]", items: "Save Began (\(filePath))", level: .debug)
+        Log.debug("Save began (\(filePath))")
         do {
             try value.write(to: filePath, options: [.atomic])
-            print(owner: "LoadAction[File]", items: "Save Success", level: .debug)
+            Log.verbose("Save Success")
         } catch (let error) {
-            print(owner: "LoadAction[File]", items: "Save Failure. \(error)", level: .error)
+            Log.error("Save Failure. \(error)")
             throw error
         }
     }

@@ -17,26 +17,26 @@ open class CompletionLoadAction<A, T>: LoadAction<T> {
     open var baseLoadAction: LoadAction<A>
     
     fileprivate func loadInner(completion: @escaping LoadResultClosure) {
-        print(owner: "LoadAction[Completion]", items: "Load Tegan", level: .debug)
+        Log.debug("Load Began")
         baseLoadAction.load() { (result) in
             switch result {
             case .failure(let error):
-                print(owner: "LoadAction[Completion]", items: "Load Failure Tase", level: .debug)
+                Log.error("Load Failure Base")
                 completion(.failure(error))
             case .success(let loadedValue):
                 do {
                     try self.completionClosure(loadedValue).load(completion: { (result) in
                         switch result {
                         case .failure(let error):
-                            print(owner: "LoadAction[Completion]", items: "Load Failure", level: .debug)
+                            Log.error("Load Failure")
                             completion(.failure(error))
                         case .success(let loadedValue2):
-                            print(owner: "LoadAction[Completion]", items: "Load Success", level: .debug)
+                            Log.verbose("Load Success")
                             completion(.success(loadedValue2))
                         }
                     })
                 } catch(let error) {
-                    print(owner: "LoadAction[Completion]", items: "Load Failure Completion", level: .debug)
+                    Log.error("Load Failure Completion")
                     completion(.failure(error))
                 }
             }
