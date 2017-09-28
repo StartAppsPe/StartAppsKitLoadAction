@@ -16,7 +16,7 @@
         
         open var predicate: NSPredicate?
         
-        fileprivate func loadInner(completion: LoadResultClosure) {
+        fileprivate func loadInner(completion: LoadedResultClosure) {
             Log.info("Load single began")
             do {
                 if let loadedValue = try NSManagedObject.fetchSingle(U.self, predicate: predicate) {
@@ -52,7 +52,7 @@
         
         open var predicate: NSPredicate?
         
-        fileprivate func loadInner(completion: LoadResultClosure) {
+        fileprivate func loadInner(completion: LoadedResultClosure) {
             Log.info("Load single optional began")
             do {
                 let loadedValue = try NSManagedObject.fetchSingle(U.self, predicate: predicate)
@@ -84,7 +84,7 @@
         open var predicate:       NSPredicate?
         open var sortDescriptors: [NSSortDescriptor]?
         
-        fileprivate func loadInner(completion: LoadResultClosure) {
+        fileprivate func loadInner(completion: LoadedResultClosure) {
             Log.info("Load began")
             do {
                 let loadedValue = try NSManagedObject.fetch(U.self, predicate: predicate, sortDescriptors: sortDescriptors)

@@ -20,7 +20,7 @@ open class ProcessLoadAction<A, T>: LoadAction<T> {
     
     open var baseLoadAction: LoadAction<A>
     
-    fileprivate func loadInner(completion: @escaping LoadResultClosure) {
+    fileprivate func loadInner(completion: @escaping LoadedResultClosure) {
         baseLoadAction.load() { (result) in
             switch result {
             case .failure(let error):
@@ -38,8 +38,8 @@ open class ProcessLoadAction<A, T>: LoadAction<T> {
     
     public init(
         baseLoadAction: LoadAction<A>,
-        process:        @escaping ProcessResult,
-        dummy:          (() -> ())? = nil)
+        process:        @escaping ProcessResult
+        )
     {
         self.baseLoadAction = baseLoadAction
         self.processClosure = process

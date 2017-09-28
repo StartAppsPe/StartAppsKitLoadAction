@@ -28,13 +28,13 @@ open class CacheLoadAction<T>: LoadAction<T> {
      - parameter forced: If true forces main load
      - parameter completion: Closure called when operation finished
      */
-    open func load(forced: Bool, completion: LoadResultClosure?) {
+    open func load(forced: Bool, updated: UpdatedClosure? = nil, completion: LoadedResultClosure? = nil) {
         useForcedNext = forced
-        load(completion: completion)
+        load(updated: updated, completion: completion)
     }
 
-    open func loadAny(forced: Bool, completion: ((Result<Any>) -> Void)?) {
-        load(forced: forced) { (resultGeneric) -> Void in
+    open func loadAny(forced: Bool, updated: UpdatedClosure? = nil, completion: ((Result<Any>) -> Void)? = nil) {
+        load(forced: forced, updated: updated) { (resultGeneric) -> Void in
             switch resultGeneric {
             case .success(let loadedValue):
                 completion?(.success(loadedValue))
@@ -44,16 +44,17 @@ open class CacheLoadAction<T>: LoadAction<T> {
         }
     }
 
-    open override func loadNew(completion: ((Result<Any>) -> Void)?) {
+    open override func loadNew(updated: UpdatedClosure? = nil, completion: ((Result<Any>) -> Void)? = nil) {
         Log.debug("Load New")
-        loadAny(forced: true, completion: completion)
+        loadAny(forced: true, updated: updated, completion: completion)
     }
     
-    fileprivate func loadInner(completion: @escaping LoadResultClosure) {
+    fileprivate func loadInner(completion: @escaping LoadedResultClosure) {
         guard useForcedNext == false else {
             self.loadCache(completion: { (result) in
                 switch result {
                 case .success(let value):
+                    Log.verbose("Pre updated value from cache")
                     self.value = value
                     self.sendDelegateUpdates()
                 case .failure(_):
@@ -69,6 +70,7 @@ open class CacheLoadAction<T>: LoadAction<T> {
             case .success(let value):
                 do {
                     if try self.updateCacheClosure(self) {
+                        Log.verbose("Pre updated value from cache")
                         self.value = value
                         self.sendDelegateUpdates()
                         self.loadBase(completion: completion)
@@ -78,6 +80,7 @@ open class CacheLoadAction<T>: LoadAction<T> {
                 } catch {
                     // Must load base when load cache fails
                     Log.error("Fallback to base 2")
+                    Log.verbose("Pre updated value from cache")
                     self.value = value
                     self.sendDelegateUpdates()
                     self.loadBase(completion: completion)
@@ -95,7 +98,7 @@ open class CacheLoadAction<T>: LoadAction<T> {
      
      - parameter completion: Closure called when operation finished
      */
-    fileprivate func loadCache(completion: @escaping LoadResultClosure) {
+    fileprivate func loadCache(completion: @escaping LoadedResultClosure) {
         Log.debug("Cache Load Began")
         cacheLoadAction.load() { (result) in
             switch result {
@@ -114,7 +117,7 @@ open class CacheLoadAction<T>: LoadAction<T> {
      
      - parameter completion: Closure called when operation finished
      */
-    fileprivate func loadBase(completion: @escaping LoadResultClosure) {
+    fileprivate func loadBase(completion: @escaping LoadedResultClosure) {
         Log.debug("Base Load Began")
         baseLoadAction.load() { (result) in
             switch result {
@@ -155,8 +158,8 @@ open class CacheLoadAction<T>: LoadAction<T> {
         baseLoadAction:  LoadAction<T>,
         cacheLoadAction: LoadAction<T>,
         saveToCache:     SaveToCacheResult?,
-        updateCache:     @escaping UpdateCacheResult,
-        dummy:           (() -> ())? = nil)
+        updateCache:     @escaping UpdateCacheResult
+        )
     {
         self.baseLoadAction     = baseLoadAction
         self.cacheLoadAction    = cacheLoadAction

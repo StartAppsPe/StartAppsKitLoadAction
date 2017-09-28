@@ -18,7 +18,7 @@ open class StaticLoadAction: LoadAction<StaticContent> {
     
     open let dataSource = StaticDataSource()
     
-    fileprivate func loadInner(completion: LoadResultClosure) {
+    fileprivate func loadInner(completion: LoadedResultClosure) {
         do {
             let staticContent = try staticContentClosure()
             completion(.success(staticContent))
@@ -28,8 +28,8 @@ open class StaticLoadAction: LoadAction<StaticContent> {
     }
     
     public init(
-        staticContent: @escaping StaticContentResult,
-        dummy:       (() -> ())? = nil)
+        staticContent: @escaping StaticContentResult
+        )
     {
         self.staticContentClosure = staticContent
         super.init(

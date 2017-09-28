@@ -45,7 +45,7 @@ public protocol LoadActionLoadableType: AnyObject {
     func addDelegate(_ delegate: LoadActionDelegate, updateNow: Bool)
     func addDelegate(_ delegate: LoadActionDelegate)
     func removeDelegate(_ delegate: LoadActionDelegate)
-    func sendDelegateUpdates(forced: Bool)
+    func sendDelegateUpdates(forced: Bool, final: Bool)
     
 }
 
@@ -53,13 +53,19 @@ public protocol LoadActionType: LoadActionLoadableType {
     
     associatedtype T
     
+    associatedtype UpdatedClosure = (_ loadAction: LoadActionType, _ updatedProperties: Set<LoadActionProperties>) -> Void
+    
     associatedtype LoadedResultType    = Result<T>
     associatedtype LoadedResultClosure = (_ result: LoadedResultType) -> Void
-    associatedtype LoadedResult        = (_ completion: LoadedResultClosure?) -> Void
+    
+    associatedtype LoadClosure = (_ completion: LoadedResultClosure) -> Void
     
     var value: T? { get }
     
-    func load(completion: LoadedResultClosure?)
+    var updatedHandlers: [UpdatedClosure] { get }
+    var completionHandlers: [LoadedResultClosure] { get }
+    
+    func load(updated: UpdatedClosure?, completion: LoadedResultClosure?)
     
 }
 
@@ -82,35 +88,6 @@ public extension LoadActionType {
             return .error(error)
         } else {
             return .empty
-        }
-    }
-    
-    public func sendDelegateUpdates(forced: Bool = false) {
-        DispatchQueue.main.async {
-            guard forced || self.updatedProperties.count > 0 else { return }
-            self.delegates.forEach({
-                $0.loadActionUpdated(loadAction: self, updatedProperties: self.updatedProperties)
-            })
-            self.updatedProperties = []
-        }
-    }
-    
-    public func addDelegate(_ delegate: LoadActionDelegate) {
-        addDelegate(delegate, updateNow: true)
-    }
-    
-    public func addDelegate(_ delegate: LoadActionDelegate, updateNow: Bool) {
-        if !delegates.contains(where: { $0 === delegate }) {
-            delegates.append(delegate)
-            if updateNow {
-                delegate.loadActionUpdated(loadAction: self, updatedProperties: [])
-            }
-        }
-    }
-    
-    public func removeDelegate(_ delegate: LoadActionDelegate) {
-        if let index = delegates.index(where: { $0 === delegate }) {
-            delegates.remove(at: index)
         }
     }
     

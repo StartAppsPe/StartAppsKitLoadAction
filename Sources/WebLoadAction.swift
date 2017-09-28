@@ -29,7 +29,7 @@ open class WebLoadAction: LoadAction<Data> {
         return URLSession.shared
     }
     
-    fileprivate func loadInner(completion: @escaping LoadResultClosure) {
+    fileprivate func loadInner(completion: @escaping LoadedResultClosure) {
         Log.debug("Load Began (Url: \(urlRequest.url?.absoluteString ?? "-"))")
         session.dataTask(with: urlRequest, completionHandler: { (loadedData, urlResponse, error) -> Void in
             if let error = error {

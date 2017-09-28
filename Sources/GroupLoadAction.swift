@@ -33,9 +33,9 @@ open class GroupLoadAction<T>: LoadAction<T> {
     fileprivate var actionsToLoad: [LoadActionLoadableType] = []
     
     fileprivate var forceNew = false
-    open override func loadNew(completion: ((Result<Any>) -> Void)?) {
+    open override func loadNew(updated: UpdatedClosure? = nil, completion: ((Result<Any>) -> Void)? = nil) {
         forceNew = true
-        super.loadNew(completion: completion)
+        super.loadNew(updated: updated, completion: completion)
     }
     
     /**
@@ -149,8 +149,8 @@ open class GroupLoadAction<T>: LoadAction<T> {
         order:             GroupLoadOrder = .parallel,
         actions:          [LoadActionLoadableType],
         processValue:      ProcessValue? = nil,
-        processError:      ProcessError? = nil,
-        dummy:             (() -> ())? = nil)
+        processError:      ProcessError? = nil
+        )
     {
         self.order = order
         self.actions = actions

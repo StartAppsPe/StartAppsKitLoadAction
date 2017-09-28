@@ -13,8 +13,8 @@ open class ProcessFileLoadAction<T>: ProcessLoadAction<Data, T> {
     
     public init(
         filePath: String,
-        process:  @escaping ProcessResult,
-        dummy:    (() -> ())? = nil)
+        process:  @escaping ProcessResult
+        )
     {
         super.init(
             baseLoadAction: FileLoadAction(filePath: filePath),
@@ -29,7 +29,7 @@ open class FileLoadAction: LoadAction<Data> {
     
     open var filePath: String
     
-    fileprivate func loadInner(completion: LoadResultClosure) {
+    fileprivate func loadInner(completion: LoadedResultClosure) {
         do {
             completion(.success(try FileLoadAction.loadFromFile(filePath: filePath)))
         } catch (let error) {

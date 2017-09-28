@@ -16,7 +16,7 @@ open class CompletionLoadAction<A, T>: LoadAction<T> {
     
     open var baseLoadAction: LoadAction<A>
     
-    fileprivate func loadInner(completion: @escaping LoadResultClosure) {
+    fileprivate func loadInner(completion: @escaping LoadedResultClosure) {
         Log.debug("Load Began")
         baseLoadAction.load() { (result) in
             switch result {
