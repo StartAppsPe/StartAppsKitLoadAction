@@ -69,7 +69,7 @@ open class LoadAction<T>: LoadActionType {
         DispatchQueue.global().async {
             
             // Cancel if already loading
-            guard status != .loading else {
+            guard self.status != .loading else {
                 // Completion handler will be called later
                 Log.debug("Load Batched")
                 self.sendDelegateUpdates()
@@ -77,12 +77,12 @@ open class LoadAction<T>: LoadActionType {
             }
             
             // Adjust loading status to loading kind
-            status = .loading
+            self.status = .loading
             LoadActionLoadingCount += 1
-            sendDelegateUpdates()
+            self.sendDelegateUpdates()
             
             // Load value
-            loadClosure() { (result) -> () in
+             self.loadClosure() { (result) -> () in
                 
                 switch result {
                 case .success(let loadedValue):
@@ -98,7 +98,7 @@ open class LoadAction<T>: LoadActionType {
                 self.status = .ready
                 LoadActionLoadingCount -= 1
                 self.sendDelegateUpdates(final: true)
-                DispatchQueue.main.sync {
+                DispatchQueue.main.async {
                     while !self.completionHandlers.isEmpty {
                         let completion = self.completionHandlers.removeFirst()
                         completion(result)
@@ -149,7 +149,7 @@ extension LoadAction {
     
     public func sendDelegateUpdates(forced: Bool = false, final: Bool = false) {
         guard forced || self.updatedProperties.count > 0 else { return }
-        DispatchQueue.main.sync {
+        DispatchQueue.main.async {
             Log.verbose("Sending delegate updates")
             for updatedHandler in self.updatedHandlers {
                 updatedHandler(self, self.updatedProperties)
