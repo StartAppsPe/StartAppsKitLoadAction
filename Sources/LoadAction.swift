@@ -66,43 +66,40 @@ open class LoadAction<T>: LoadActionType {
             completionHandlers.append(completion)
         }
         
-        DispatchQueue.global().async {
+        // Cancel if already loading
+        guard self.status != .loading else {
+            // Completion handler will be called later
+            Log.debug("Load Batched")
+            self.sendDelegateUpdates()
+            return
+        }
+        
+        // Adjust loading status to loading kind
+        self.status = .loading
+        LoadActionLoadingCount += 1
+        self.sendDelegateUpdates()
+        
+        // Load value
+        self.loadClosure() { (result) -> () in
             
-            // Cancel if already loading
-            guard self.status != .loading else {
-                // Completion handler will be called later
-                Log.debug("Load Batched")
-                self.sendDelegateUpdates()
-                return
+            switch result {
+            case .success(let loadedValue):
+                Log.debug("Loaded Success")
+                self.value = loadedValue
+                self.error = nil
+            case .failure(let error):
+                Log.error("Loaded Failure (\(error))")
+                self.error = error
             }
             
-            // Adjust loading status to loading kind
-            self.status = .loading
-            LoadActionLoadingCount += 1
-            self.sendDelegateUpdates()
-            
-            // Load value
-             self.loadClosure() { (result) -> () in
-                
-                switch result {
-                case .success(let loadedValue):
-                    Log.debug("Loaded Success")
-                    self.value = loadedValue
-                    self.error = nil
-                case .failure(let error):
-                    Log.error("Loaded Failure (\(error))")
-                    self.error = error
-                }
-                
-                // Adjust loading status to loaded kind and call completion
-                self.status = .ready
-                LoadActionLoadingCount -= 1
-                self.sendDelegateUpdates(final: true)
-                DispatchQueue.main.async {
-                    while !self.completionHandlers.isEmpty {
-                        let completion = self.completionHandlers.removeFirst()
-                        completion(result)
-                    }
+            // Adjust loading status to loaded kind and call completion
+            self.status = .ready
+            LoadActionLoadingCount -= 1
+            self.sendDelegateUpdates(final: true)
+            DispatchQueue.main.async {
+                while !self.completionHandlers.isEmpty {
+                    let completion = self.completionHandlers.removeFirst()
+                    completion(result)
                 }
             }
         }
