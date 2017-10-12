@@ -8,6 +8,7 @@
 
 import Foundation
 import StartAppsKitLogger
+import StartAppsKitExtensions
 
 public enum WebLoadError: LocalizedError {
     case noInternet, emptyResponse

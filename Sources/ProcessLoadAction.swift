@@ -8,10 +8,6 @@
 
 import Foundation
 
-public enum ProcessLoadError: Error {
-    case automaticProcessFailure
-}
-
 open class ProcessLoadAction<A, T>: LoadAction<T> {
     
     public typealias ProcessResult = (_ loadedValue: A) throws -> T
@@ -50,17 +46,6 @@ open class ProcessLoadAction<A, T>: LoadAction<T> {
             self.loadInner(completion: completion)
         }
         self.loadClosure = loadClosure
-    }
-    
-}
-
-public extension ProcessLoadAction {
-    
-    public class func automaticProcess(loadedValue: A) throws -> T {
-        guard let loadedValue = loadedValue as? T else {
-            throw ProcessLoadError.automaticProcessFailure
-        }
-        return loadedValue
     }
     
 }
