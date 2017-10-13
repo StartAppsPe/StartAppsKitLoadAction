@@ -59,7 +59,3 @@ public func LastProcess<T>(_ loadedValue: [T]) throws -> T? {
 public func FilterNilsProcess<T>(_ loadedValue: [T?]) throws -> [T] {
     return loadedValue.flatMap({ $0 })
 }
-
-public func CountProcess<T>(_ loadedValue: [T]) throws -> Int {
-    return loadedValue.count()
-}
