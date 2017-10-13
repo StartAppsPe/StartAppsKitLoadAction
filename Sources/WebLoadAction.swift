@@ -9,14 +9,14 @@
 import Foundation
 import StartAppsKitLogger
 
-public enum WebLoadError: Error, LocalizedError {
+public enum WebLoadError: LocalizedError {
     case noInternet, emptyResponse
     public var errorDescription: String? {
         switch self {
         case .noInternet:
-            return NSLocalizedString("No internet connection.", comment: "")
+            return "No internet connection".localized
         case .emptyResponse:
-            return NSLocalizedString("Empty response.", comment: "")
+            return "Empty response".localized
         }
     }
 }
