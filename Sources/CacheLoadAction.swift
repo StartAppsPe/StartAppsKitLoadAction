@@ -52,6 +52,13 @@ open class CacheLoadAction<T>: LoadAction<T> {
     fileprivate func loadInner(completion: @escaping LoadResultClosure) {
         guard useForcedNext == false else {
             self.loadCache(completion: { (result) in
+                switch result {
+                case .success(let value):
+                    self.value = value
+                    self.sendDelegateUpdates()
+                case .failure(_):
+                    break
+                }
                 self.loadBase(completion: completion)
             })
             useForcedNext = false
@@ -59,9 +66,11 @@ open class CacheLoadAction<T>: LoadAction<T> {
         }
         self.loadCache(completion: { (result) in
             switch result {
-            case .success(_):
+            case .success(let value):
                 do {
                     if try self.updateCacheClosure(self) {
+                        self.value = value
+                        self.sendDelegateUpdates()
                         self.loadBase(completion: completion)
                     } else {
                         completion(result)
@@ -69,6 +78,8 @@ open class CacheLoadAction<T>: LoadAction<T> {
                 } catch {
                     // Must load base when load cache fails
                     Log.error("Fallback to base 2")
+                    self.value = value
+                    self.sendDelegateUpdates()
                     self.loadBase(completion: completion)
                 }
             case .failure(_):
@@ -86,7 +97,7 @@ open class CacheLoadAction<T>: LoadAction<T> {
      */
     fileprivate func loadCache(completion: @escaping LoadResultClosure) {
         Log.debug("Cache Load Began")
-        cacheLoadAction.load { (result) in
+        cacheLoadAction.load() { (result) in
             switch result {
             case .success(_):
                 Log.verbose("Cache Load Success")
@@ -105,7 +116,7 @@ open class CacheLoadAction<T>: LoadAction<T> {
      */
     fileprivate func loadBase(completion: @escaping LoadResultClosure) {
         Log.debug("Base Load Began")
-        baseLoadAction.load { (result) in
+        baseLoadAction.load() { (result) in
             switch result {
             case .success(let value):
                 if let saveToCacheClosure = self.saveToCacheClosure {
