@@ -374,7 +374,7 @@
                     case .loaded:
                         tableView.tempSeparatorStyle = nil
                     default:
-                        tableView.tempSeparatorStyle = .none
+                        tableView.tempSeparatorStyle = UITableViewCellSeparatorStyle.none
                     }
                 }
             }
