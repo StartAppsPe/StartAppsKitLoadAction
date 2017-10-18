@@ -131,12 +131,46 @@
             
             if let tableView = self as? UITableView {
                 tableView.displayStateView.loadActionUpdated(loadAction: loadAction, updatedProperties: updatedProperties)
-                tableView.separatorStyle = (loadAction.value != nil ? .singleLine : .none)
+                tableView.tempSeparatorStyle = (loadAction.value != nil ? nil : .none)
                 tableView.reloadData()
             }
             if let collectionView = self as? UICollectionView {
                 collectionView.displayStateView.loadActionUpdated(loadAction: loadAction, updatedProperties: updatedProperties)
                 collectionView.reloadData()
+            }
+        }
+        
+    }
+    
+    private var _sdkh: UInt8 = 0
+    extension UITableView: LoadActionDelegate {
+        
+        private var _storedSeparatorStyle: UITableViewCellSeparatorStyle? {
+            get {
+                guard let rawValue = objc_getAssociatedObject(self, &_sdkh) as? Int else { return nil }
+                return UITableViewCellSeparatorStyle(rawValue: rawValue)
+            }
+            set {
+                objc_setAssociatedObject(self, &_sdkh, newValue?.rawValue, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
+            }
+        }
+        
+        public var tempSeparatorStyle: UITableViewCellSeparatorStyle? {
+            get {
+                if _storedSeparatorStyle == nil { return nil }
+                return separatorStyle
+            }
+            set {
+                if newValue == .none {
+                    if _storedSeparatorStyle == nil { _storedSeparatorStyle = separatorStyle }
+                    separatorStyle = .none
+                } else if newValue == .singleLineEtched {
+                    if _storedSeparatorStyle == nil { _storedSeparatorStyle = separatorStyle }
+                    separatorStyle = .singleLineEtched
+                } else if let storedSeparatorStyle = _storedSeparatorStyle {
+                    separatorStyle = storedSeparatorStyle
+                    _storedSeparatorStyle = nil
+                }
             }
         }
         

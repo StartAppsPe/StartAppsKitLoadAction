@@ -364,8 +364,20 @@
         }
         
         public var displayState: DisplayState {
-            get { return displayStateView.displayState }
-            set { displayStateView.displayState = newValue }
+            get {
+                return displayStateView.displayState
+            }
+            set {
+                displayStateView.displayState = newValue
+                if let tableView = self as? UITableView {
+                    switch displayStateView.displayState {
+                    case .loaded:
+                        tableView.tempSeparatorStyle = nil
+                    default:
+                        tableView.tempSeparatorStyle = .none
+                    }
+                }
+            }
         }
         
     }
