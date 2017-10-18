@@ -79,27 +79,30 @@ open class LoadAction<T>: LoadActionType {
         LoadActionLoadingCount += 1
         self.sendDelegateUpdates()
         
-        // Load value
-        self.loadClosure() { (result) -> () in
-            
-            switch result {
-            case .success(let loadedValue):
-                Log.debug("Loaded Success")
-                self.value = loadedValue
-                self.error = nil
-            case .failure(let error):
-                Log.error("Loaded Failure (\(error))")
-                self.error = error
-            }
-            
-            // Adjust loading status to loaded kind and call completion
-            self.status = .ready
-            LoadActionLoadingCount -= 1
-            self.sendDelegateUpdates(final: true)
-            DispatchQueue.main.async {
-                while !self.completionHandlers.isEmpty {
-                    let completion = self.completionHandlers.removeFirst()
-                    completion(result)
+        DispatchQueue.global(qos: .userInitiated).async {
+        
+            // Load value
+            self.loadClosure() { (result) -> () in
+                
+                switch result {
+                case .success(let loadedValue):
+                    Log.debug("Loaded Success")
+                    self.value = loadedValue
+                    self.error = nil
+                case .failure(let error):
+                    Log.error("Loaded Failure (\(error))")
+                    self.error = error
+                }
+                
+                // Adjust loading status to loaded kind and call completion
+                self.status = .ready
+                LoadActionLoadingCount -= 1
+                self.sendDelegateUpdates(final: true)
+                DispatchQueue.main.async {
+                    while !self.completionHandlers.isEmpty {
+                        let completion = self.completionHandlers.removeFirst()
+                        completion(result)
+                    }
                 }
             }
         }
