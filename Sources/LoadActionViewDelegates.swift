@@ -161,12 +161,12 @@
                 return separatorStyle
             }
             set {
-                if newValue == .none {
+                if newValue == UITableViewCellSeparatorStyle.none {
                     if _storedSeparatorStyle == nil { _storedSeparatorStyle = separatorStyle }
-                    separatorStyle = .none
-                } else if newValue == .singleLineEtched {
+                    separatorStyle = UITableViewCellSeparatorStyle.none
+                } else if newValue == UITableViewCellSeparatorStyle.singleLineEtched {
                     if _storedSeparatorStyle == nil { _storedSeparatorStyle = separatorStyle }
-                    separatorStyle = .singleLineEtched
+                    separatorStyle = UITableViewCellSeparatorStyle.singleLineEtched
                 } else if let storedSeparatorStyle = _storedSeparatorStyle {
                     separatorStyle = storedSeparatorStyle
                     _storedSeparatorStyle = nil
