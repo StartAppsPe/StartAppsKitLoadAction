@@ -143,7 +143,7 @@
     }
     
     private var _sdkh: UInt8 = 0
-    extension UITableView: LoadActionDelegate {
+    extension UITableView {
         
         private var _storedSeparatorStyle: UITableViewCellSeparatorStyle? {
             get {
