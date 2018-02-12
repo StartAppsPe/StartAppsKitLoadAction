@@ -185,6 +185,17 @@ extension LoadAction {
     
 }
 
+open class EmptyLoadAction: LoadAction<IgnoreValue> {
+    
+    public init() {
+        super.init { completion in
+            completion(.success(IgnoreValue()))
+        }
+    }
+    
+}
+
+
 public func Load<B>(_ startLoadAction: (() -> LoadAction<B>)) -> LoadAction<B> {
     return startLoadAction()
 }
